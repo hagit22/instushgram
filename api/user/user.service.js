@@ -16,8 +16,10 @@ const COLLECTION = 'user'
 async function query() {
     try {
         const collection = await dbService.getCollection(COLLECTION)
-        const users = await collection.find().toArray()
+        let users = await collection.find().toArray()
         users.forEach(user => delete user.password)
+        users.forEach(user => user.username = user.username.toLowerCase())
+        //users = users.map(user => (_userToLowerCase(user)))
         return users
     } 
     catch(err) {
@@ -31,7 +33,7 @@ async function getById(userId) {
         const collection = await dbService.getCollection(COLLECTION)
         const user = await collection.findOne({ _id: new ObjectId(userId) })
         delete user.password
-        return user
+        return _userToLowerCase(user)
     } 
     catch (err) {
         loggerService.error(`Had problems getting user by id ${userId}...`)
@@ -46,7 +48,7 @@ async function getByUsername(username, withPassword=false) {
         const user = await collection.findOne({ username: regex })
         if (!withPassword)
             delete user.password
-        return user
+        return _userToLowerCase(user)
     } 
     catch (err) {
         loggerService.error(`Had problems getting user by username ${username}...`)
@@ -75,14 +77,16 @@ async function save(userToSave) {
                 imgUrl: userToSave.imgUrl,
                 following: JSON.parse(JSON.stringify(userToSave.following)),
                 followers: JSON.parse(JSON.stringify(userToSave.followers)),
-                bookmarkedStories: JSON.parse(JSON.stringify(userToSave.bookmarkedStories))
+                notifications: JSON.parse(JSON.stringify(userToSave.notifications)),
+                bookmarkedStories: JSON.parse(JSON.stringify(userToSave.bookmarkedStories)),
+                //password: userToSave.password
             }
             const { acknowledged } = await collection.updateOne({ _id: new ObjectId(userToSave._id) }, { $set: userUpdate })
             return acknowledged ? userToSave : `Did not update user` // returning userToSave because it includes the id
          } 
         else {
             // Adding default initialization to brand new user that just signed up
-            userToSave = {...userToSave, following: [], followers: [], bookmarkedStories: []}
+            userToSave = {...userToSave, following: [], followers: [], notifications: [], bookmarkedStories: [] }
             const { acknowledged } = await collection.insertOne(userToSave)
             return acknowledged ? userToSave : `Did not add user`
         }
@@ -105,6 +109,11 @@ async function doesUserExist(username) {
         loggerService.error(`User already exists ${username}`)
             return false
     }
+}
+
+async function _userToLowerCase(user)
+{
+    return ({...user, username: user.username.toLowerCase()})
 }
 
 

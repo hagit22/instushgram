@@ -82,6 +82,7 @@ async function save(storyToSave, loggedinUser) {
                 txt: storyToSave.txt,
                 imgUrl: storyToSave.imgUrl,
                 by: {...storyToSave.by},
+                createdAt: storyToSave.createdAt,
                 likedBy: JSON.parse(JSON.stringify(storyToSave.likedBy)),
                 comments: JSON.parse(JSON.stringify(storyToSave.comments))
             }
