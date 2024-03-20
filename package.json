@@ -6,13 +6,12 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "set PORT=3034 & nodemon --ignore \"./data\" server.js",
+    "dev": "set PORT=3035 & nodemon --ignore \"./data\" server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

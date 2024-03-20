@@ -1,5 +1,5 @@
 import Cryptr from 'cryptr'
-import bcrypt from 'bcrypt'
+import bcryptjs from 'bcryptjs'
 import { loggerService } from '../../services/logger.service.js'
 import { userService } from '../user/user.service.js'
 
@@ -16,7 +16,7 @@ export const authService = {
 async function signup(username, password, fullname, imgUrl) {
     try {
         const saltRounds = 10
-        const hash = await bcrypt.hash(password, saltRounds)
+        const hash = await bcryptjs.hash(password, saltRounds)
         const user = await userService.save({ username, password: hash, fullname, imgUrl: imgUrl || '' })
         return user
     }
@@ -31,7 +31,7 @@ async function login(username, password) {
         const user = await userService.getByUsername(username, true)
         if (!user) 
             throw 'Unknown username'
-        const match = await bcrypt.compare(password, user.password)
+        const match = await bcryptjs.compare(password, user.password)
         if (!match) 
             throw 'Invalid username or password'
         const miniUser = {_id: user._id, username: user.username, imgUrl: user.imgUrl}
