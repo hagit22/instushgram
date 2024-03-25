@@ -1,5 +1,6 @@
 import Cryptr from 'cryptr'
 import bcryptjs from 'bcryptjs'
+import { socketService, notificationTypes } from '../../services/socket.service.js'
 import { loggerService } from '../../services/logger.service.js'
 import { userService } from '../user/user.service.js'
 
@@ -18,6 +19,7 @@ async function signup(username, password, fullname, imgUrl) {
         const saltRounds = 10
         const hash = await bcryptjs.hash(password, saltRounds)
         const user = await userService.save({ username, password: hash, fullname, imgUrl: imgUrl || '' })
+        socketService.broadcast(user._id, notificationTypes.newUser, {newUserId: user._id})
         return user
     }
     catch (err) {

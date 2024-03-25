@@ -1,6 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import { createServer } from 'node:http'
+import { socketService } from './services/socket.service.js'
 import { storyRoutes } from './api/story/story.routes.js'
 import { userRoutes } from './api/user/user.routes.js'
 import { authRoutes } from './api/auth/auth.routes.js'
@@ -25,13 +27,15 @@ app.use('/api/story', storyRoutes)
 app.use('/api/user', userRoutes)
 app.use('/api/auth', authRoutes)
 
+const nodeServer = createServer(app)
+socketService.initialize(nodeServer)
+
 // Fallback route
 app.get('/**', (req, res) => {
     res.sendFile(path.resolve('public/index.html'))
 })
 
-
-app.listen(port, () => console.log(`Instushgram Server is ready for your requests! Listening on port ${port}!`))
+nodeServer.listen(port, () => console.log(`Instushgram Server is ready for your requests! Listening on port ${port}!`))
 
 
 

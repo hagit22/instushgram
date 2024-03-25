@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { socketService, notificationTypes } from '../../services/socket.service.js'
 import { loggerService } from '../../services/logger.service.js'
 import { dbService } from '../../services/db.service.js';
 
@@ -96,7 +97,9 @@ async function save(storyToSave, loggedinUser) {
                 username: loggedinUser.username, 
                 imgUrl:  loggedinUser.imgUrl
             }
-            const { acknowledged } = await collection.insertOne(storyToSave)
+            const { acknowledged, insertedId: newStoryId } = await collection.insertOne(storyToSave)
+            if (acknowledged)
+                socketService.broadcast(loggedinUser._id, notificationTypes.newStory, {newStoryId})
             return acknowledged ? storyToSave : `Did not add story`
         }
     } catch (err) {
