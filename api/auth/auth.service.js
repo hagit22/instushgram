@@ -19,7 +19,8 @@ async function signup(username, password, fullname, imgUrl) {
         const saltRounds = 10
         const hash = await bcryptjs.hash(password, saltRounds)
         const user = await userService.save({ username, password: hash, fullname, imgUrl: imgUrl || '' })
-        socketService.broadcast(user._id, notificationTypes.newUser, {newUserId: user._id})
+        socketService.broadcast(user._id, notificationTypes.newUser, 
+            {newUserId: user._id, newUserImgUrl: user.imgUrl, newUserName: user.username})
         return user
     }
     catch (err) {

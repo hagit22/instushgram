@@ -44,9 +44,9 @@ const _commentFields = (comment) => {
 const _notificationsArray = ({ notifications }) => !notifications || notifications.length == 0 ? [] : 
     [...notifications.map(obj => (_notificationFields(obj)))]
 const _notificationFields = (notification) => {
-    const { _id, createdAt, txt } = notification
+    const { _id, createdAt, txt, storyImgUrl } = notification
     const about =  _miniUser(notification.about)
-    return { _id, createdAt, txt, about }
+    return { _id, createdAt, txt, storyImgUrl, about }
 }
 
 
