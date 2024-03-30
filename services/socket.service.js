@@ -58,8 +58,8 @@ function initialize(nodeServer) {
                 {newFollowerId: connectedSocket.userId})
         })
         
-        connectedSocket.on(clientMessages.userStory, ({followersList, storyImgUrl}) => {
-            console.log("Client-msg: userStory: ",storyImgUrl)
+        connectedSocket.on(clientMessages.userPost, ({followersList, storyImgUrl}) => {
+            console.log("Client-msg: userPost: ",storyImgUrl)
             followersList.forEach(follower => {
                 notifyUser(follower._id, 
                     notificationTypes.storyByFollowing, 

@@ -4,7 +4,8 @@ export const utilService = {
     makeId,
     readJsonFile,
     saveEntitiesToFile,
-    toLowerCaseAllowEmpty
+    toLowerCaseAllowEmpty,
+    arrayDiff
 }
 
 function makeId(length = 6) {
@@ -40,5 +41,15 @@ function toLowerCaseAllowEmpty(obj) {
     catch(error) { // for example, a blank string
         return obj
     }
+}
+
+function arrayDiff(arrLong, arrShort) {
+    if (arrLong.length <= arrShort.length)
+        return []
+    const longSet = new Set(arrLong)
+    const shortSet = new Set(arrShort)
+    const diff = longSet.difference(shortSet)
+    console.log(diff)
+    return diff
 }
 

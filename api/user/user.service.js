@@ -1,4 +1,6 @@
 import { ObjectId } from 'mongodb';
+import { socketService, notificationTypes } from '../../services/socket.service.js'
+import { utilService } from '../../services/util.service.js';
 import { loggerService } from '../../services/logger.service.js'
 import { dbService } from '../../services/db.service.js';
 
@@ -72,6 +74,7 @@ async function save(userToSave) {
     try {
         const collection = await dbService.getCollection(COLLECTION)
         if(userToSave._id && userToSave._id.length > 0) {
+            //const prevUserToSave = await getById(userToSave._id)
             const userUpdate = {
                 fullname: userToSave.fullname,
                 imgUrl: userToSave.imgUrl,
@@ -82,8 +85,14 @@ async function save(userToSave) {
                 //password: userToSave.password
             }
             const { acknowledged } = await collection.updateOne({ _id: new ObjectId(userToSave._id) }, { $set: userUpdate })
+            if (acknowledged) {
+                const newFollowers = utilService.arrayDiff(userUpdate.followers, userToSave.followers)
+                if (newFollowers.length === 1)
+                    socketService.broadcast(userToSave._id, notificationTypes.newFollower, 
+                        {newFollowerId : newFollowers[0]._id})
+            }
             return acknowledged ? userToSave : `Did not update user` // returning userToSave because it includes the id
-         } 
+        } 
         else {
             // Adding default initialization to brand new user that just signed up
             userToSave = {...userToSave, following: [], followers: [], notifications: [], bookmarkedStories: [] }

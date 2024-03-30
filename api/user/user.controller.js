@@ -19,7 +19,7 @@ export async function getUsers(req, res) {
     } 
     catch (err) {
         res.status(400).send(`Couldn't get users : ` + err)
-        console.log(err.message)
+        console.log(`Couldn't get users : ` + err.message)
     }
 }
 
@@ -31,8 +31,8 @@ export async function getUserById(req, res) {
         res.send(user)
     } 
     catch (err) {
-        res.status(400).send(`Couldn't get user : ` + err)
-        console.log(err.message)
+        res.status(400).send(`Couldn't get user by id : ` + err)
+        console.log(`Couldn't get user by id : ` + err.message)
     }
 }
 
@@ -44,8 +44,8 @@ export async function getUserByName(req, res) {
         res.send(user)
     } 
     catch (err) {
-        res.status(400).send(`Couldn't get user : ` + err)
-        console.log(err.message)
+        res.status(400).send(`Couldn't get user by name : ` + err)
+        console.log(`Couldn't get user by name : ` + err.message)
     }
 }
 
@@ -59,7 +59,7 @@ export async function removeUser(req, res) {
     } 
     catch (err) {
         res.status(400).send(`Couldn't remove user : ` + err)
-        console.log(err.message)
+        console.log(`Couldn't remove user : ` + err.message)
     }
 }
 
@@ -74,7 +74,7 @@ export async function addUser(req, res) {
     } 
     catch (err) {
         res.status(400).send(`Couldn't add user : ` + err)
-        console.log(err.message)
+        console.log(`Couldn't add user : ` + err.message)
     }
 }
 
@@ -88,7 +88,7 @@ export async function updateUser(req, res) {
     } 
     catch (err) {
         res.status(400).send(`Couldn't update user : ` + err)
-        console.log(err.message)
+        console.log(`Couldn't update user : ` + err.message)
     }
 }
 
