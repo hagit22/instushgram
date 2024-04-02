@@ -99,11 +99,8 @@ async function save(storyToSave, loggedinUser) {
                 imgUrl:  loggedinUser.imgUrl
             }
             const { acknowledged, insertedId: newStoryId } = await collection.insertOne(storyToSave)
-            if (acknowledged) {
+            if (acknowledged) 
                 socketService.broadcast(loggedinUser._id, notificationTypes.newStory, {newStoryId})
-                socketService.broadcast(loggedinUser._id, notificationTypes.storyByFollowing, 
-                            {followingUserId: loggedinUser._id, storyImgUrl: storyToSave.imgUrl})
-            }
             return acknowledged ? storyToSave : `Did not add story`
         }
     } catch (err) {

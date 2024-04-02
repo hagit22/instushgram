@@ -16,7 +16,7 @@ export const notificationTypes = {
 const clientMessages = {
     userIdentify: 'user-identify',  // gets: { sendingUserId }
     userFollow: 'user-follow',      // gets: { followingUserId }
-    userPost: 'user-post'           // gets: { followersList, storyId }
+    userPost: 'user-post'           // gets: { followersIdList, storyId }
 }
 
 
@@ -28,7 +28,7 @@ function initialize(nodeServer) {
 
     console.log("got socket handler")
 
-    socketsHandler.engine.on("connection_error", (err) => {
+    socketsHandler.on("connection_error", (err) => {
         console.log("Socket Error: ")
         console.log("err-code: ",err.code);     
         console.log("err-message: ",err.message);  
@@ -36,33 +36,34 @@ function initialize(nodeServer) {
         //console.log("err-request: ",err.req);      
     });
     
-    socketsHandler.engine.on('connection', connectedSocket => {
+    socketsHandler.on('connection', connectedSocket => {
         
         console.log("Socket connected: ",connectedSocket.id)
         openSockets.push(connectedSocket)
         
         connectedSocket.on('disconnect', () => {
-            console.log("Socket disconnect was fired",openSockets)
+            console.log("Socket disconnect was fired: ",connectedSocket.id)
             openSockets = openSockets.filter(socket => socket.id !== connectedSocket.id)
+            console.log("Open Sockets list: ",openSockets.map(socket => socket.id))
         })
         
         connectedSocket.on(clientMessages.userIdentify, ({sendingUserId}) => {
             console.log("Client-msg: userIdentify: ",sendingUserId)
             connectedSocket.userId = sendingUserId
+            console.log("Sockets list User-Ids: ",openSockets.map(socket => socket.userId))
         })
         
         connectedSocket.on(clientMessages.userFollow, ({followingUserId}) => {
-            console.log("Client-msg: userFollow: ",followingUserId)
+            console.log("Client-msg: userFollow: ",connectedSocket.userId, followingUserId)
             notifyUser(followingUserId, 
                 notificationTypes.newFollower, 
                 {newFollowerId: connectedSocket.userId})
         })
         
-        connectedSocket.on(clientMessages.userPost, ({followersList, storyImgUrl}) => {
-            console.log("Client-msg: userPost: ",storyImgUrl)
-            followersList.forEach(follower => {
-                notifyUser(follower._id, 
-                    notificationTypes.storyByFollowing, 
+        connectedSocket.on(clientMessages.userPost, ({followersIdList, storyImgUrl}) => {
+            console.log("Client-msg: userPost: ",connectedSocket.userId, storyImgUrl)
+            followersIdList.forEach(followerId => {
+                notifyUser(followerId, notificationTypes.storyByFollowing, 
                     {followingUserId: connectedSocket.userId, storyImgUrl})
             })
         })
@@ -72,6 +73,7 @@ function initialize(nodeServer) {
 function notifyUser(toUserId, notificationType, data) {
     try {
         console.log("notifyUser: ",toUserId, notificationType, data)
+        console.log("NotifyUser: Sockets list User-Ids: ",openSockets.map(socket => socket.userId))
         const toUserSocket = openSockets.filter(socket => socket.userId === toUserId)[0]
         if (!toUserSocket) {
             console.log("notifyUser: notification not emitted ",notificationType) 
@@ -87,6 +89,7 @@ function notifyUser(toUserId, notificationType, data) {
 function broadcast(sendingUserId, notificationType, data) {
     try {
         console.log("Broadcast: ",sendingUserId, notificationType, data)
+        console.log("Broadcast: Sockets list User-Ids: ",openSockets.map(socket => socket.userId))
         const sendingUserSocket = openSockets.filter(socket => socket.userId === sendingUserId)[0]
         if (sendingUserSocket) 
             sendingUserSocket.broadcast.emit(notificationType, data)    // Broadcasting to all users, excluding the sending user
