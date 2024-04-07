@@ -14,9 +14,9 @@ export const notificationTypes = {
 }
 
 const clientMessages = {
-    userIdentify: 'user-identify',  // gets: { sendingUserId }
+    userIdentify: 'user-identify',  // gets: { connectedUserId, connectedUsername }
     userFollow: 'user-follow',      // gets: { followingUserId }
-    userPost: 'user-post'           // gets: { followersIdList, storyId }
+    userPost: 'user-post'           // gets: { followersIdList, storyImgUrl }
 }
 
 
@@ -44,13 +44,14 @@ function initialize(nodeServer) {
         connectedSocket.on('disconnect', () => {
             console.log("Socket disconnect was fired: ",connectedSocket.id)
             openSockets = openSockets.filter(socket => socket.id !== connectedSocket.id)
-            console.log("Open Sockets list: ",openSockets.map(socket => socket.id))
+            _printSocketList()
         })
         
-        connectedSocket.on(clientMessages.userIdentify, ({sendingUserId}) => {
-            console.log("Client-msg: userIdentify: ",sendingUserId)
-            connectedSocket.userId = sendingUserId
-            console.log("Sockets list User-Ids: ",openSockets.map(socket => socket.userId))
+        connectedSocket.on(clientMessages.userIdentify, ({connectedUserId, connectedUsername}) => {
+            console.log("Client-msg: userIdentify: ",connectedUserId, connectedUsername)
+            connectedSocket.userId = connectedUserId
+            connectedSocket.username = connectedUsername
+            _printSocketList()
         })
         
         connectedSocket.on(clientMessages.userFollow, ({followingUserId}) => {
@@ -73,12 +74,13 @@ function initialize(nodeServer) {
 function notifyUser(toUserId, notificationType, data) {
     try {
         console.log("notifyUser: ",toUserId, notificationType, data)
-        console.log("NotifyUser: Sockets list User-Ids: ",openSockets.map(socket => socket.userId))
+        //_printSocketList()
         const toUserSocket = openSockets.filter(socket => socket.userId === toUserId)[0]
         if (!toUserSocket) {
             console.log("notifyUser: notification not emitted ",notificationType) 
             return
         }
+        console.log("NotifyUser: to-user socket.id: ",toUserSocket.id)
         toUserSocket.emit(notificationType, data)
     }
     catch(err) {
@@ -89,7 +91,7 @@ function notifyUser(toUserId, notificationType, data) {
 function broadcast(sendingUserId, notificationType, data) {
     try {
         console.log("Broadcast: ",sendingUserId, notificationType, data)
-        console.log("Broadcast: Sockets list User-Ids: ",openSockets.map(socket => socket.userId))
+        //_printSocketList()
         const sendingUserSocket = openSockets.filter(socket => socket.userId === sendingUserId)[0]
         if (sendingUserSocket) 
             sendingUserSocket.broadcast.emit(notificationType, data)    // Broadcasting to all users, excluding the sending user
@@ -101,22 +103,8 @@ function broadcast(sendingUserId, notificationType, data) {
     }
 }
 
-/*function _getUserSocket(allSockets, userId) {
-    console.log("getUserSocket: openSockets = ",openSockets)
-    const userSocketObj = openSockets.find(socketObj => socketObj.userId === userId) 
-    if (!userSocketObj) return null
-    return allSockets.find(socket => socket.id === userSocketObj.socketId)
-}*/
-
-
-/* Will be done by client!
-function _addNotificationMessage(toUser, notificationMessage) {
-    if (notificationMessage === notificationMessages.none)
-        return
-    const notificationMessage = userService.generateNotification  ==> WILL BE DONE BY CLIENT!!!
-    const userToSave = {...toUser, notifications: [notificationMessage, ...toUser.notifications]}
-    console.log("user to save: ",userToSave)
-    userService.save(userToSave)
-    //userService.save({...toUser, notifications: [notificationMessage, ...toUser.notifications]})
-}*/
+function _printSocketList() {
+    console.log("Current open sockets: ",openSockets.length,":")
+    openSockets.forEach(openSocket => console.log("       ",openSocket.id,": ",openSocket.userId,"-",openSocket.username))
+}
 
